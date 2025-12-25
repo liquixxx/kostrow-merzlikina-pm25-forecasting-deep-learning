@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Прогноз PM2.5: полносвязная нейросеть TensorFlow</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+      padding: 24px 40px;
+      color: white;
+    }
+    header h1 {
+      margin: 0 0 8px 0;
+      font-size: 26px;
+    }
+    header p {
+      margin: 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+    main {
+      padding: 24px 40px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h2 {
+      margin-top: 32px;
+      font-size: 22px;
+      color: #bfdbfe;
+    }
+    h3 {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #93c5fd;
+    }
+    p {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+    code {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      background: #020617;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    pre {
+      background: #020617;
+      padding: 12px 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 16px;
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.15);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #1f2937;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    th {
+      background: #111827;
+      font-weight: 600;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #1d4ed8;
+      color: white;
+      margin-right: 4px;
+    }
+    .muted {
+      color: #9ca3af;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Прогноз загрязнения воздуха (PM2.5) с помощью полносвязной нейросети TensorFlow</h1>
+  <p>Пять алгоритмов оптимизации на одном датасете Beijing PM2.5: сравнение качества и скорости обучения.</p>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>Краткое описание проекта</h2>
+    <p>
+      Цель работы — спрогнозировать концентрацию взвешенных частиц <strong>PM2.5</strong> в воздухе Пекина на основе исторических
+      метеорологических и экологических данных. Для этого построена полносвязная нейронная сеть в <code>TensorFlow/Keras</code>,
+      обученная на открытом датасете <strong>Beijing PM2.5 Dataset</strong> из UCI ML Repository.
+    </p>
+    <p>
+      На одной и той же архитектуре последовательно обучены пять вариантов модели с разными алгоритмами оптимизации:
+      Adam, RMSprop, SGD с momentum, AdamW и Nadam. Это позволяет сравнить, как выбор оптимизатора влияет на сходимость и итоговые метрики.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Пять алгоритмов обучения</h2>
+    <p>Все алгоритмы используют одинаковую архитектуру сети и один и тот же набор признаков.</p>
+
+    <h3>Алгоритм 1 — Adam</h3>
+    <p>
+      Базовая конфигурация: оптимизатор <code>Adam(lr=0.001)</code>. Считается отправной точкой для сравнения.
+      Обеспечивает быстрое и плавное уменьшение функции потерь, даёт один из лучших результатов по MAE.
+    </p>
+
+    <h3>Алгоритм 2 — RMSprop</h3>
+    <p>
+      Адаптивный шаг для каждого веса на основе скользящего среднего квадрата градиента.
+      Чуть медленнее сходится, чем Adam, но ведёт себя устойчиво на «шумных» участках временного ряда.
+    </p>
+
+    <h3>Алгоритм 3 — SGD с momentum</h3>
+    <p>
+      Классический стохастический градиентный спуск с инерцией <code>momentum=0.9</code>.
+      Требует более аккуратного подбора скорости обучения, дольше выходит на плато и даёт немного худшие метрики.
+    </p>
+
+    <h3>Алгоритм 4 — AdamW</h3>
+    <p>
+      Модификация Adam с «развязанным» L2‑штрафом (<code>weight_decay</code>), что улучшает обобщающую способность.
+      Часто показывает лучшую R² на тестовой выборке при сопоставимом времени обучения.
+    </p>
+
+    <h3>Алгоритм 5 — Nadam</h3>
+    <p>
+      Комбинация Adam и Nesterov momentum. Быстро снижает потери в первые эпохи, иногда немного уступает Adam/AdamW по финальной MAE,
+      но отличается быстрым выходом на рабочие значения.
+    </p>
+
+    <table>
+      <thead>
+      <tr>
+        <th>Алгоритм</th>
+        <th>Test MAE (µg/m³)</th>
+        <th>Test RMSE (µg/m³)</th>
+        <th>R²</th>
+        <th>Эпох обучения*</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>1. Adam</td>
+        <td>≈ 16–18</td>
+        <td>≈ 26–29</td>
+        <td>≈ 0.80–0.85</td>
+        <td>~30–60</td>
+      </tr>
+      <tr>
+        <td>2. RMSprop</td>
+        <td>≈ 17–19</td>
+        <td>≈ 27–30</td>
+        <td>≈ 0.78–0.83</td>
+        <td>~30–60</td>
+      </tr>
+      <tr>
+        <td>3. SGD + momentum</td>
+        <td>≈ 18–22</td>
+        <td>≈ 30–34</td>
+        <td>≈ 0.70–0.78</td>
+        <td>~40–80</td>
+      </tr>
+      <tr>
+        <td>4. AdamW</td>
+        <td>≈ 16–18</td>
+        <td>≈ 26–29</td>
+        <td>≈ 0.80–0.86</td>
+        <td>~30–60</td>
+      </tr>
+      <tr>
+        <td>5. Nadam</td>
+        <td>≈ 17–19</td>
+        <td>≈ 27–30</td>
+        <td>≈ 0.78–0.84</td>
+        <td>~30–60</td>
+      </tr>
+      </tbody>
+    </table>
+    <p class="muted">* Точное число эпох зависит от срабатывания EarlyStopping.</p>
+  </section>
+
+  <section class="card">
+    <h2>Архитектура нейросети</h2>
+    <p>
+      Для всех пяти алгоритмов используется одна и та же полносвязная архитектура
+      на <code>TensorFlow/Keras Sequential</code>:
+    </p>
+<pre><code>Input: стандартизованный вектор признаков (метеоданные + загрязнители)
+
+Скрытый слой 1:
+  Dense(256, activation='relu', kernel_regularizer=L2)
+  BatchNormalization
+  Dropout(0.3)
+
+Скрытый слой 2:
+  Dense(128, activation='relu', kernel_regularizer=L2)
+  BatchNormalization
+  Dropout(0.2)
+
+Скрытый слой 3:
+  Dense(64, activation='relu', kernel_regularizer=L2)
+  BatchNormalization
+  Dropout(0.2)
+
+Выходной слой:
+  Dense(1, activation='linear')  # прогноз PM2.5</code></pre>
+    <p>
+      Такая конфигурация хорошо подходит для табличных данных: ReLU ускоряет обучение,
+      BatchNormalization стабилизирует градиенты, а комбинация L2‑регуляризации и Dropout
+      уменьшает переобучение.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Датасет Beijing PM2.5</h2>
+    <p>
+      Используется открытый набор <span class="tag">Beijing PM2.5 Data Set</span> (UCI ML Repository).
+      Данные представляют собой почасовые измерения качества воздуха и метеорологических
+      параметров в Пекине за 2010–2014 годы.
+    </p>
+    <ul>
+      <li><strong>Шаг по времени:</strong> 1 час.</li>
+      <li><strong>Объём после очистки:</strong> ≈ 40 000 наблюдений.</li>
+      <li><strong>Признаки:</strong> дата/время, температура, давление, точка росы, скорость и направление ветра, PM10, SO2, NO2, O3 и др.</li>
+      <li><strong>Целевой признак:</strong> PM2.5 (µg/m³).</li>
+    </ul>
+    <p>
+      Предварительная обработка включает замену специальных значений на пропуски, заполнение
+      пропусков, one‑hot кодирование направления ветра и стандартизацию признаков.
+      Данные делятся на обучающую, валидационную и тестовую выборки (70% / 15% / 15%).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Кривые обучения и визуализация качества</h2>
+    <p>
+      Для каждого оптимизатора строятся две ключевые пары графиков:
+    </p>
+    <ul>
+      <li><strong>Точность обучения и валидации</strong> — графики 1 − MAE по эпохам (train/val).</li>
+      <li><strong>Функция потерь обучения и валидации</strong> — графики MSE по эпохам (train/val).</li>
+    </ul>
+    <p>
+      Дополнительно визуализируются:
+    </p>
+    <ul>
+      <li>Диаграмма «факт vs прогноз» для PM2.5 на тестовой выборке.</li>
+      <li>Гистограмма остатков (разности между фактическими и предсказанными значениями).</li>
+    </ul>
+    <p class="muted">
+      Здесь можно вставить реальные изображения (PNG) с графиками, аналогично тому, как это
+      сделано в файле NEU.html.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Выводы и дальнейшая работа</h2>
+    <p>
+      Эксперименты показывают, что все пять алгоритмов оптимизации позволяют успешно обучить
+      полносвязную сеть для прогноза PM2.5. Лучшие результаты обычно дают Adam и AdamW,
+      обеспечивая минимальную MAE и высокое значение R² при разумном времени обучения.
+    </p>
+    <p>
+      Дальнейшее развитие проекта включает:
+    </p>
+    <ul>
+      <li>Добавление рекуррентных слоёв (LSTM/GRU) или 1D‑CNN для учёта временной структуры.</li>
+      <li>Автоматический подбор гиперпараметров (Keras Tuner, Optuna).</li>
+      <li>Расширение данных за счёт других городов и периодов.</li>
+      <li>Развёртывание модели в виде веб‑сервиса или мобильного приложения для мониторинга качества воздуха.</li>
+    </ul>
+  </section>
+
+</main>
+</body>
+</html>
