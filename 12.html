@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>PM2.5 Forecasting – TensorFlow Dense NN</title>
+  <style>
+    body {{
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg,#243B55,#141E30);
+      color: #f5f5f5;
+      padding: 30px;
+    }}
+    .card {{
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 25px;
+      margin-bottom: 20px;
+    }}
+    h1 {{ color: #FFD700; }}
+    table {{
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }}
+    th, td {{
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 10px;
+      text-align: center;
+    }}
+    th {{ background: rgba(255,255,255,0.15); }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏭 Прогноз загрязнения воздуха (PM2.5)</h1>
+    <p>Полносвязная нейросеть TensorFlow обучена на исторических данных Beijing PM2.5 (UCI). [web:10]</p>
+  </div>
+
+  <div class="card">
+    <h2>Лучшая модель</h2>
+    <p><b>Оптимизатор:</b> {best_name}</p>
+    <p><b>MAE:</b> {results[best_name]['test_mae_orig']:.2f} µg/m³</p>
+    <p><b>RMSE:</b> {results[best_name]['test_rmse_orig']:.2f} µg/m³</p>
+    <p><b>R²:</b> {results[best_name]['r2_score']:.3f}</p>
+  </div>
+
+  <div class="card">
+    <h2>Сравнение всех оптимизаторов</h2>
+    <table>
+      <tr><th>Оптимизатор</th><th>MAE (µg/m³)</th><th>RMSE (µg/m³)</th><th>R²</th></tr>
+      {''.join(f"<tr><td>{name}</td><td>{m['test_mae_orig']:.2f}</td><td>{m['test_rmse_orig']:.2f}</td><td>{m['r2_score']:.3f}</td></tr>" for name,m in results.items())}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Как интерпретировать графики</h2>
+    <ul>
+      <li>Логарифмические кривые loss должны быть плавными и сходиться друг к другу (train и val), что говорит об устойчивом обучении.</li>
+      <li>Облако «факт vs прогноз» должно приближаться к диагонали, а гистограмма остатков — быть симметричной вокруг нуля.</li>
+    </ul>
+  </div>
+</body>
+</html>
+"""
